@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- <!DOCTYPE project PUBLIC "-//ANT//DTD project//EN" "project.dtd"> -->
+<!--
+  @(#)build.xml 1.00 18/07/21
+
+  Copyright (C) 2018 Jürgen Reuter
+
+  This program is free software: you can redistribute it and/or modify
+  it under the terms of the GNU General Public License as published by
+  the Free Software Foundation, either version 3 of the License, or
+  (at your option) any later version.
+
+  This program is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+  GNU General Public License for more details.
+
+  You should have received a copy of the GNU General Public License
+  along with this program.  If not, see <http://www.gnu.org/licenses/>.
+-->
+
+<project name="spherical-propagation" default="all" basedir=".">
+
+  <!-- set DSTAMP, TSTAMP, and TODAY properties -->
+  <tstamp />
+
+  <!-- relative position in the file system -->
+  <property name="projectroot" value="."/>
+  <property name="srcdir" value="${projectroot}/src"/>
+  <property name="projectname" value="spherical propagation"/>
+  <property name="appmain" value="org.soundpaint.sphericalpropagation.Main"/>
+
+  <!-- standard structure of output files -->
+  <property name="builddir" value="${projectroot}/build"/>
+  <property name="outputdir" value="${builddir}/${ant.project.name}"/>
+  <property name="classdir" value="${outputdir}/class"/>
+  <property name="libdir" value="${outputdir}/lib"/>
+  <property name="binjar" value="${libdir}/${ant.project.name}.jar"/>
+  <property name="java-sources" value="${srcdir}/java"/>
+
+  <path id="classpath">
+    <pathelement path="${classdir}"/>
+  </path>
+
+  <!-- build targets  -->
+
+  <target name="bin">
+    <mkdir dir="${classdir}"/>
+    <javac debug="yes" srcdir="${java-sources}" destdir="${classdir}"
+	   deprecation="yes">
+      <compilerarg value="-Xlint:all"/>
+      <classpath refid="classpath"/>
+    </javac>
+  </target>
+
+  <target name="bin.jar" depends="bin">
+    <mkdir dir="${libdir}"/>
+    <jar jarfile="${binjar}"
+	 manifest="${srcdir}/META-INF/MANIFEST.MF"
+	 update="false">
+      <fileset dir="${projectroot}" casesensitive="yes">
+	<include name="COPYING_??"/>
+      </fileset>
+      <fileset dir="${classdir}"/>
+      <fileset dir="${java-sources}">
+	<include name="**/*.properties"/>
+      </fileset>
+      <fileset dir="${outputdir}">
+	<include name="media/*.syg"/>
+      </fileset>
+      <fileset dir="${srcdir}">
+	<include name="media/*.png"/>
+      </fileset>
+      <fileset dir="${outputdir}">
+	<include name="helpdoc/**" />
+      </fileset>
+      <manifest>
+	<attribute name="Specification-Version"
+		   value="${version}"/>
+	<attribute name="Implementation-Version"
+		   value="${version} ${TODAY}"/>
+      </manifest>
+    </jar>
+  </target>
+
+  <target name="all" depends="bin.jar"/>
+
+  <target name="run" depends="bin.jar">
+    <java jar="${binjar}" fork="yes">
+      <assertions>
+	<enable />
+      </assertions>
+      <classpath refid="classpath"/>
+    </java>
+  </target>
+
+  <target name="tarball">
+    <tstamp prefix="tarstamp.">
+      <format property="TODAY" pattern="yyyy-MM-dd.HH-mm-ss" />
+    </tstamp>
+    <tar destfile="${projectroot}/../sphericalpropagation-${tarstamp.TODAY}.src.tar.bz2"
+	 compression="bzip2">
+      <tarfileset dir="." prefix="sphericalpropagation-${tarstamp.TODAY}">
+	<exclude name="**/*~" />
+	<exclude name="build/**" />
+      </tarfileset>
+    </tar>
+  </target>
+
+  <target name="clean">
+    <delete dir="${outputdir}"/>
+  </target>
+
+  <target name="cleanall">
+    <delete dir="${antbuildrootdir}"/>
+  </target>
+</project>
+
+<!--
+    Local Variables:
+    coding:utf-8
+    mode:sgml
+    mode:nXML
+    End:
+-->

@@ -1,0 +1,7 @@
+Manifest-Version: 1.0
+Specification-Title: N.A.
+Created-By: Jürgen Reuter
+Implementation-Title: Spherical Propagation
+Specification-Vendor: Jürgen Reuter
+Implementation-Vendor: Jürgen Reuter
+Main-Class: org.soundpaint.sphericalpropagation.Main

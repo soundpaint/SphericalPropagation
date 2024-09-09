@@ -19,11 +19,21 @@
 
 package org.soundpaint.sphericalpropagation;
 
+/**
+ * Provide <code>main</code> method for the spherical propagation
+ * application.
+ */
 public class Main
 {
   private static final int X_SIZE = 300;
   private static final int Y_SIZE = 300;
 
+  /**
+   * Main entry method.  Starts the application.
+   *
+   * @param argv the array of command-line arguments for the
+   * application; currently, this argument is ignored
+   */
   public static void main(final String argv[])
   {
     final Display display = new Display(X_SIZE, Y_SIZE);

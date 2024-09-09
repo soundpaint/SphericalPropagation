@@ -19,21 +19,40 @@
 
 package org.soundpaint.sphericalpropagation;
 
-import java.awt.Color;
-
+/**
+ * The core simulation.
+ */
 public class Simulator
 {
+  /**
+   * Each object instance of this class represents a single cell of
+   * the cellular automaton.
+   */
   public class Cell
   {
+    /**
+     * "Force" values for xand y direction.
+     */
     public double forceX, forceY;
   }
 
   private final int sizeX, sizeY;
   private final Display display;
-  private Cell frontBuffer[][], backBuffer[][];
+  private Cell[][] frontBuffer, backBuffer;
 
-  private Simulator() { throw new UnsupportedOperationException(); }
+  private Simulator() {
+    throw new UnsupportedOperationException();
+  }
 
+  /**
+   * Create a new instance of thecellular automaton simulation on a
+   * cellular grid with the specified dimension.
+   *
+   * @param sizeX the width of the grid of the cellular automaton
+   * @param sizeY the height of the grid of the cellular automaton
+   * @param display the output to use for displaying the automaton's
+   * current state
+   */
   public Simulator(final int sizeX, final int sizeY,
                    final Display display)
   {
@@ -44,32 +63,8 @@ public class Simulator
     backBuffer = new Cell[sizeX][sizeY];
   }
 
-  private static float saturize(final double value)
-  {
-    return Math.max(0.0f, Math.min((float)value, 1.0f));
-  }
-
-  private static Color getColor(final Cell cell)
-  {
-    final double brightness =
-      100000.0 * Math.sqrt(cell.forceX * cell.forceX +
-                           cell.forceY * cell.forceY);
-    final double hue =
-      Math.atan2(cell.forceY, cell.forceX);
-    return Color.getHSBColor((float)(hue), 1.0f, saturize(brightness));
-  }
-
-  private void updateDisplay()
-  {
-    final Color colors[][] = new Color[sizeX][sizeY];
-    for (int x = 0; x < sizeX; x++)
-      for (int y = 0; y < sizeY; y++)
-        colors[x][y] = getColor(frontBuffer[x][y]);
-    display.update(colors);
-  }
-
   private void updateCell(final int x, final int y, final Cell cell,
-                          final Cell buffer[][])
+                          final Cell[][] buffer)
   {
     final Cell neighbourSouth = buffer[x][(y + 1) % sizeY];
     final Cell neighbourNorth = buffer[x][(y - 1 + sizeY) % sizeY];
@@ -98,27 +93,31 @@ public class Simulator
     final Cell cell = frontBuffer[sizeX / 2][sizeY / 2];
     cell.forceX = 100.0;
     cell.forceY = -100.0;
-    updateDisplay();
   }
 
+  /**
+   * Start the simulation.
+   */
   public void run()
   {
     setupStartConfiguration();
     int count = 0;
     while (true) {
       try {
-        Thread.currentThread().sleep(100);
-      } catch (final InterruptedException e) {}
+        Thread.sleep(100);
+      } catch (final InterruptedException exc) {
+        return; // abort simulation
+      }
       for (int x = 0; x < sizeX; x++)
         for (int y = 0; y < sizeY; y++)
           updateCell(x, y, backBuffer[x][y], frontBuffer);
       final Cell swapBuffer[][] = frontBuffer;
       frontBuffer = backBuffer;
       backBuffer = swapBuffer;
-      count++;
-      if (count == 4) {
-        updateDisplay();
-        count = 0;
+      count--;
+      if (count < 0) {
+        display.update(frontBuffer);
+        count = 3;
       }
     }
   }

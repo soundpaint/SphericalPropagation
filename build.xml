@@ -47,7 +47,7 @@
   <target name="bin">
     <mkdir dir="${classdir}"/>
     <javac debug="yes" srcdir="${java-sources}" destdir="${classdir}"
-	   deprecation="yes">
+           deprecation="yes">
       <compilerarg value="-Xlint:all"/>
       <classpath refid="classpath"/>
     </javac>
@@ -56,29 +56,29 @@
   <target name="bin.jar" depends="bin">
     <mkdir dir="${libdir}"/>
     <jar jarfile="${binjar}"
-	 manifest="${srcdir}/META-INF/MANIFEST.MF"
-	 update="false">
+         manifest="${srcdir}/META-INF/MANIFEST.MF"
+         update="false">
       <fileset dir="${projectroot}" casesensitive="yes">
-	<include name="COPYING_??"/>
+        <include name="COPYING_??"/>
       </fileset>
       <fileset dir="${classdir}"/>
       <fileset dir="${java-sources}">
-	<include name="**/*.properties"/>
+        <include name="**/*.properties"/>
       </fileset>
       <fileset dir="${outputdir}">
-	<include name="media/*.syg"/>
+        <include name="media/*.syg"/>
       </fileset>
       <fileset dir="${srcdir}">
-	<include name="media/*.png"/>
+        <include name="media/*.png"/>
       </fileset>
       <fileset dir="${outputdir}">
-	<include name="helpdoc/**" />
+        <include name="helpdoc/**" />
       </fileset>
       <manifest>
-	<attribute name="Specification-Version"
-		   value="${version}"/>
-	<attribute name="Implementation-Version"
-		   value="${version} ${TODAY}"/>
+        <attribute name="Specification-Version"
+                   value="${version}"/>
+        <attribute name="Implementation-Version"
+                   value="${version} ${TODAY}"/>
       </manifest>
     </jar>
   </target>
@@ -88,7 +88,7 @@
   <target name="run" depends="bin.jar">
     <java jar="${binjar}" fork="yes">
       <assertions>
-	<enable />
+        <enable />
       </assertions>
       <classpath refid="classpath"/>
     </java>
@@ -99,10 +99,10 @@
       <format property="TODAY" pattern="yyyy-MM-dd.HH-mm-ss" />
     </tstamp>
     <tar destfile="${projectroot}/../sphericalpropagation-${tarstamp.TODAY}.src.tar.bz2"
-	 compression="bzip2">
+         compression="bzip2">
       <tarfileset dir="." prefix="sphericalpropagation-${tarstamp.TODAY}">
-	<exclude name="**/*~" />
-	<exclude name="build/**" />
+        <exclude name="**/*~" />
+        <exclude name="build/**" />
       </tarfileset>
     </tar>
   </target>

@@ -36,9 +36,11 @@ public class Simulator
     public double forceX, forceY;
   }
 
+  private final int rounds;
   private final int sizeX, sizeY;
   private final Display display;
-  private Cell[][] frontBuffer, backBuffer;
+  private Cell[][] prevState, nextState;
+  private int round;
 
   private Simulator() {
     throw new UnsupportedOperationException();
@@ -48,28 +50,33 @@ public class Simulator
    * Create a new instance of thecellular automaton simulation on a
    * cellular grid with the specified dimension.
    *
+   * @param rounds the number of simulation steps to perform
    * @param sizeX the width of the grid of the cellular automaton
    * @param sizeY the height of the grid of the cellular automaton
    * @param display the output to use for displaying the automaton's
    * current state
    */
-  public Simulator(final int sizeX, final int sizeY,
+  public Simulator(final int rounds, final int sizeX, final int sizeY,
                    final Display display)
   {
+    this.rounds = rounds;
     this.sizeX = sizeX;
     this.sizeY = sizeY;
     this.display = display;
-    frontBuffer = new Cell[sizeX][sizeY];
-    backBuffer = new Cell[sizeX][sizeY];
+    prevState = new Cell[sizeX][sizeY];
+    nextState = new Cell[sizeX][sizeY];
   }
 
-  private void updateCell(final int x, final int y, final Cell cell,
-                          final Cell[][] buffer)
+  private void updateCell(final int x, final int y, final Cell cell)
   {
-    final Cell neighbourSouth = buffer[x][(y + 1) % sizeY];
-    final Cell neighbourNorth = buffer[x][(y - 1 + sizeY) % sizeY];
-    final Cell neighbourWest = buffer[(x - 1 + sizeX) % sizeX][y];
-    final Cell neighbourEast = buffer[(x + 1) % sizeX][y];
+    final int xEast = x < sizeX - 1 ? x + 1 : x + 1 - sizeX;
+    final int xWest = x > 0 ? x - 1 : sizeX - 1;
+    final int ySouth = y < sizeY - 1 ? y + 1 : y + 1 - sizeY;
+    final int yNorth = y > 0 ? y - 1 : sizeY - 1;
+    final Cell neighbourSouth = prevState[x][ySouth];
+    final Cell neighbourNorth = prevState[x][yNorth];
+    final Cell neighbourWest = prevState[xWest][y];
+    final Cell neighbourEast = prevState[xEast][y];
     cell.forceX =
       0.25 * neighbourSouth.forceX -
       0.25 * neighbourNorth.forceX +
@@ -86,13 +93,40 @@ public class Simulator
   {
     for (int x = 0; x < sizeX; x++) {
       for (int y = 0; y < sizeY; y++) {
-        frontBuffer[x][y] = new Cell();
-        backBuffer[x][y] = new Cell();
+        prevState[x][y] = new Cell();
+        nextState[x][y] = new Cell();
       }
     }
-    final Cell cell = frontBuffer[sizeX / 2][sizeY / 2];
+    final Cell cell = prevState[sizeX / 2][sizeY / 2];
     cell.forceX = 100.0;
     cell.forceY = -100.0;
+  }
+
+  private void swapStates() {
+    final Cell swapState[][] = prevState;
+    prevState = nextState;
+    nextState = swapState;
+  }
+
+  private static void showProgress(final Simulator simulator) {
+    System.out.println(); // ensure we start a new line
+    for (;;) {
+      try {
+        Thread.sleep(1000);
+      } catch (final InterruptedException exc) {
+        break;
+      }
+      simulator.showProgress();
+    }
+    simulator.showProgress();
+  }
+
+  private void showProgress() {
+    final double percent = 100.0 * round / rounds;
+    final String progress =
+      String.format("[% 4d/%d (%3.2f%%)]\r", round, rounds, percent);
+    System.out.println(progress);
+    System.out.flush();
   }
 
   /**
@@ -100,25 +134,16 @@ public class Simulator
    */
   public void run()
   {
+    final Thread progressThread = new Thread(() -> { showProgress(this); });
     setupStartConfiguration();
-    int count = 0;
-    while (true) {
-      try {
-        Thread.sleep(100);
-      } catch (final InterruptedException exc) {
-        return; // abort simulation
-      }
+    progressThread.start();
+    for (round = 0; round < rounds; round++) {
       for (int x = 0; x < sizeX; x++)
         for (int y = 0; y < sizeY; y++)
-          updateCell(x, y, backBuffer[x][y], frontBuffer);
-      final Cell swapBuffer[][] = frontBuffer;
-      frontBuffer = backBuffer;
-      backBuffer = swapBuffer;
-      count--;
-      if (count < 0) {
-        display.update(frontBuffer);
-        count = 3;
-      }
+          updateCell(x, y, nextState[x][y]);
+      swapStates();
+      display.update(nextState, round);
     }
+    progressThread.interrupt();
   }
 }

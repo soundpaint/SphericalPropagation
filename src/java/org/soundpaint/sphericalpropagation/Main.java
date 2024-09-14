@@ -24,8 +24,9 @@ package org.soundpaint.sphericalpropagation;
  */
 public class Main
 {
-  private static final int X_SIZE = 300;
-  private static final int Y_SIZE = 300;
+  private static final int ROUNDS = 6000;
+  private static final int X_SIZE = 450;
+  private static final int Y_SIZE = 450;
 
   /**
    * Main entry method.  Starts the application.
@@ -38,7 +39,8 @@ public class Main
     final Display display = new Display(X_SIZE, Y_SIZE);
     display.pack();
     display.setVisible(true);
-    final Simulator simulator = new Simulator(X_SIZE, Y_SIZE, display);
+    final Simulator simulator = new Simulator(ROUNDS, X_SIZE, Y_SIZE, display);
     simulator.run();
+    display.close();
   }
 }

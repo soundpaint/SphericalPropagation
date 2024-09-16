@@ -24,6 +24,10 @@ import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.WindowEvent;
+import java.awt.image.BufferedImage;
+import java.io.File;
+import java.io.IOException;
+import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -37,6 +41,10 @@ public class Display extends JFrame
 
   private final Dimension size;
   private final Color[][] colors;
+  private final transient BufferedImage image;
+  private final transient Graphics2D imageGraphics;
+
+  private int imageIndex;
 
   private class DrawArea extends JPanel
   {
@@ -83,6 +91,18 @@ public class Display extends JFrame
     }
   }
 
+  private void save() {
+    paint(imageGraphics);
+    final String dir = System.getProperties().get("rundir").toString();
+    final String filename =
+      String.format("spheral-image_%05d.png", imageIndex++);
+    try {
+      ImageIO.write(image, "PNG", new File(dir, filename));
+    } catch (final IOException exc) {
+      System.err.println("failed saving image: " + exc);
+    }
+  }
+
   private Display() {
     throw new UnsupportedOperationException();
   }
@@ -102,6 +122,8 @@ public class Display extends JFrame
     super("Circular Spreading Simulator");
     size = new Dimension(sizeX, sizeY);
     colors = new Color[sizeX][sizeY];
+    image = new BufferedImage(sizeX, sizeY, BufferedImage.TYPE_3BYTE_BGR);
+    imageGraphics = image.createGraphics();
     setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     final DrawArea drawArea = new DrawArea();
     add("Center", drawArea);
@@ -139,6 +161,7 @@ public class Display extends JFrame
       }
     }
     repaint();
+    save();
   }
 
   /**

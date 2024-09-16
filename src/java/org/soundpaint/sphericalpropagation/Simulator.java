@@ -36,9 +36,11 @@ public class Simulator
     public double forceX, forceY;
   }
 
+  private final int rounds;
   private final int sizeX, sizeY;
   private final Display display;
   private Cell[][] prevState, nextState;
+  private int round;
 
   private Simulator() {
     throw new UnsupportedOperationException();
@@ -48,14 +50,16 @@ public class Simulator
    * Create a new instance of thecellular automaton simulation on a
    * cellular grid with the specified dimension.
    *
+   * @param rounds the number of simulation steps to perform
    * @param sizeX the width of the grid of the cellular automaton
    * @param sizeY the height of the grid of the cellular automaton
    * @param display the output to use for displaying the automaton's
    * current state
    */
-  public Simulator(final int sizeX, final int sizeY,
+  public Simulator(final int rounds, final int sizeX, final int sizeY,
                    final Display display)
   {
+    this.rounds = rounds;
     this.sizeX = sizeX;
     this.sizeY = sizeY;
     this.display = display;
@@ -104,28 +108,44 @@ public class Simulator
     nextState = swapState;
   }
 
+  private static void showProgress(final Simulator simulator) {
+    System.out.println(); // ensure we start a new line
+    for (;;) {
+      try {
+        Thread.sleep(1000);
+      } catch (final InterruptedException exc) {
+        break;
+      }
+      simulator.showProgress();
+    }
+    simulator.showProgress();
+  }
+
+  private void showProgress() {
+    final double percent = 100.0 * round / rounds;
+    final String progress =
+      String.format("[% 4d/%d (%3.2f%%)]\r", round, rounds, percent);
+    System.out.println(progress);
+    System.out.flush();
+  }
+
   /**
    * Start the simulation.
    */
   public void run()
   {
+    final Thread progressThread = new Thread(() -> { showProgress(this); });
     setupStartConfiguration();
-    int count = 0;
-    while (true) {
-      try {
-        Thread.sleep(100);
-      } catch (final InterruptedException exc) {
-        return; // abort simulation
-      }
+    progressThread.start();
+    for (round = 0; round < rounds; round++) {
       for (int x = 0; x < sizeX; x++)
         for (int y = 0; y < sizeY; y++)
           updateCell(x, y, nextState[x][y]);
       swapStates();
-      count--;
-      if (count < 0) {
+      if ((round & 0x3) == 0) {
         display.update(prevState);
-        count = 3;
       }
     }
+    progressThread.interrupt();
   }
 }

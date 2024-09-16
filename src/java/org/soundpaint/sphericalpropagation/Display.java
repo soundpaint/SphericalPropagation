@@ -23,6 +23,7 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.event.WindowEvent;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 
@@ -138,5 +139,12 @@ public class Display extends JFrame
       }
     }
     repaint();
+  }
+
+  /**
+   * Close the window of this frame.
+   */
+  public void close() {
+    dispatchEvent(new WindowEvent(this, WindowEvent.WINDOW_CLOSING));
   }
 }

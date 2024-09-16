@@ -121,14 +121,17 @@ public class Display extends JFrame
 
   /**
    * Update the display for the specified cells.
+   *
+   * @param state the array of the simulator's cells, representing the
+   * latest state of the simulation
    */
-  public void update(final Simulator.Cell[][] buffer)
+  public void update(final Simulator.Cell[][] state)
   {
     final int sizeX = size.width;
     final int sizeY = size.height;
     for (int x = 0; x < sizeX; x++) {
       for (int y = 0; y < sizeY; y++) {
-        final Simulator.Cell cell = buffer[x][y];
+        final Simulator.Cell cell = state[x][y];
         final double forceX = cell.forceX;
         final double forceY = cell.forceY;
         colors[x][y] = getColor(forceX, forceY);

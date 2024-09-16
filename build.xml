@@ -39,6 +39,11 @@
   <property name="binjar" value="${libdir}/${ant.project.name}.jar"/>
   <property name="java-sources" value="${srcdir}/java"/>
 
+  <!-- captured images and video -->
+  <property name="image-all-filenames" value="spherical-propagation_*.png" />
+  <property name="image-filename" value="spherical-propagation_%05d.png" />
+  <property name="video-filename" value="spherical-propagation.mp4"/>
+
   <path id="classpath">
     <pathelement path="${classdir}"/>
   </path>
@@ -90,16 +95,42 @@
     <mkdir dir="${rundir}"/>
     <!-- delete old image files, if present -->
     <delete>
-      <fileset dir="${rundir}" includes="spheral-image_*.png"/>
+      <fileset dir="${rundir}" includes="${image-all-filenames}"/>
+      <fileset dir="${rundir}" includes="${video-filename}"/>
     </delete>
     <!-- run the simulation to create sequence of images -->
     <java jar="${binjar}" fork="yes">
       <sysproperty key="rundir" value="${rundir}"/>
+      <sysproperty key="image-filename" value="${image-filename}"/>
       <assertions>
         <enable />
       </assertions>
       <classpath refid="classpath"/>
     </java>
+    <!-- create video from sequence of images -->
+    <exec executable="ffmpeg" dir="${rundir}">
+      <arg value="-y"/> <!-- force overwrite existing output file -->
+      <arg value="-framerate"/> <!-- 10 frames per second -->
+      <arg value="10"/>
+      <arg value="-i"/> <!-- image input filename pattern -->
+      <arg value="${image-filename}"/>
+      <arg value="-c:v"/> <!-- video stream -->
+      <arg value="libx264"/> <!-- with codec x264 -->
+      <arg value="-profile:v"/> <!-- x264: select "high" profile -->
+      <arg value="high"/>
+      <arg value="-crf"/> <!-- x264: constant rate factor 23 (med quality) -->
+      <arg value="23"/>
+      <arg value="-pix_fmt"/> <!-- x264: set pixel format yuv420p -->
+      <arg value="yuv420p"/>
+      <arg value="${video-filename}"/> <!-- output file name -->
+    </exec>
+    <!-- play the video in an endless loop, with 3 seconds of pause
+         to avoid clogging up the window manager for short videos -->
+    <exec executable="vlc" dir="${rundir}">
+      <arg value="${video-filename}"/> <!-- play the generated file -->
+      <arg value="vlc://pause:3" /> <!-- 3 seconds pause before replay -->
+      <arg value="--loop"/> <!-- replay forever -->
+    </exec>
   </target>
 
   <target name="tarball">

@@ -27,6 +27,7 @@ import java.awt.event.WindowEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
@@ -93,9 +94,10 @@ public class Display extends JFrame
 
   private void save() {
     paint(imageGraphics);
-    final String dir = System.getProperties().get("rundir").toString();
-    final String filename =
-      String.format("spheral-image_%05d.png", imageIndex++);
+    final Properties props = System.getProperties();
+    final String template = props.get("image-filename").toString();
+    final String dir = props.get("rundir").toString();
+    final String filename = String.format(template, imageIndex++);
     try {
       ImageIO.write(image, "PNG", new File(dir, filename));
     } catch (final IOException exc) {

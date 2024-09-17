@@ -142,7 +142,7 @@ public class Simulator
         for (int y = 0; y < sizeY; y++)
           updateCell(x, y, nextState[x][y]);
       swapStates();
-      if ((round & 0x3) == 0) {
+      if ((round & 0x7) == 0) {
         display.update(prevState);
       }
     }

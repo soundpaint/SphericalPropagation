@@ -131,17 +131,11 @@ public class Display extends JFrame
     add("Center", drawArea);
   }
 
-  private static float saturize(final double value)
-  {
-    return Math.max(0.0f, Math.min((float)value, 1.0f));
-  }
-
   private static Color getColor(final double forceX, final double forceY)
   {
-    final double brightness =
-      100000.0 * Math.sqrt(forceX * forceX + forceY * forceY);
-    final double hue = Math.atan2(forceY, forceX);
-    return Color.getHSBColor((float)(hue), 1.0f, saturize(brightness));
+    final double brightness = 1.0;
+    final double hue = 1000.0 * Math.sqrt(forceX * forceX + forceY * forceY);
+    return Color.getHSBColor((float)(hue), 1.0f, 1.0f);
   }
 
   /**

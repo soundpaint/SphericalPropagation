@@ -25,9 +25,9 @@ package org.soundpaint.sphericalpropagation;
  */
 public class Main
 {
-  private static final int ROUNDS = 1000;
-  private static final int X_SIZE = 300;
-  private static final int Y_SIZE = 300;
+  private static final int ROUNDS = 10000;
+  private static final int X_SIZE = 450;
+  private static final int Y_SIZE = 450;
 
   /**
    * Main entry method.  Starts the application.

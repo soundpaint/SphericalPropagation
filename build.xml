@@ -110,8 +110,8 @@
     <!-- create video from sequence of images -->
     <exec executable="ffmpeg" dir="${rundir}">
       <arg value="-y"/> <!-- force overwrite existing output file -->
-      <arg value="-framerate"/> <!-- 10 frames per second -->
-      <arg value="10"/>
+      <arg value="-framerate"/> <!-- 20 frames per second -->
+      <arg value="20"/>
       <arg value="-i"/> <!-- image input filename pattern -->
       <arg value="${image-filename}"/>
       <arg value="-c:v"/> <!-- video stream -->
